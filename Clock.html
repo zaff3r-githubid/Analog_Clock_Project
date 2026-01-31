@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analog Clock - 7:22 AM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a2a6c, #2a3a7c, #3a4a8c);
+            color: white;
+            padding: 20px;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 900px;
+            width: 100%;
+            gap: 30px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            color: #ffd166;
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            color: #a8d0e6;
+            margin-bottom: 20px;
+        }
+        
+        .clock-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 50px;
+            width: 100%;
+        }
+        
+        .clock-wrapper {
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+        
+        .clock-face {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: #f8f9fa;
+            box-shadow: 
+                0 0 30px rgba(0, 0, 0, 0.4),
+                inset 0 0 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            border: 12px solid #2c3e50;
+        }
+        
+        .center-dot {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background-color: #2c3e50;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+        }
+        
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            border-radius: 10px 10px 0 0;
+            transform: translateX(-50%);
+        }
+        
+        .hour-hand {
+            width: 8px;
+            height: 80px;
+            background-color: #2c3e50;
+            z-index: 3;
+            /* Position for 7:22 - 221° from top */
+            transform: translateX(-50%) rotate(221deg);
+        }
+        
+        .minute-hand {
+            width: 6px;
+            height: 110px;
+            background-color: #2c3e50;
+            z-index: 2;
+            /* Position for 22 minutes - 132° from top */
+            transform: translateX(-50%) rotate(132deg);
+        }
+        
+        .second-hand {
+            width: 2px;
+            height: 120px;
+            background-color: #e74c3c;
+            z-index: 1;
+            /* Position for 0 seconds */
+            transform: translateX(-50%) rotate(0deg);
+        }
+        
+        .hand-decoration {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+        }
+        
+        .hour-hand::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #2c3e50;
+            border-radius: 50%;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .minute-hand::before {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background-color: #2c3e50;
+            border-radius: 50%;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .second-hand::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: #e74c3c;
+            border-radius: 50%;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        /* Hour markers */
+        .marker {
+            position: absolute;
+            background-color: #2c3e50;
+        }
+        
+        .hour-marker {
+            width: 6px;
+            height: 24px;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .minute-marker {
+            width: 3px;
+            height: 12px;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        /* Numbers */
+        .number {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Info panel */
+        .info-panel {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            max-width: 400px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .info-panel h2 {
+            color: #ffd166;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+        
+        .time-display {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 25px;
+            color: #a8d0e6;
+            font-weight: bold;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .details {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .detail-label {
+            color: #a8d0e6;
+        }
+        
+        .detail-value {
+            color: #ffd166;
+            font-weight: bold;
+        }
+        
+        .explanation {
+            margin-top: 25px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #d1e8ff;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            background-color: #34495e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        #toggleAnimation {
+            background-color: #3498db;
+        }
+        
+        #toggleAnimation:hover {
+            background-color: #2980b9;
+        }
+        
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #a8d0e6;
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .clock-container {
+                flex-direction: column;
+                gap: 30px;
+            }
+            
+            .clock-wrapper {
+                width: 280px;
+                height: 280px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .info-panel {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Analog Clock Display</h1>
+            <div class="subtitle">Showing exactly 7:22 AM</div>
+        </header>
+        
+        <div class="clock-container">
+            <div class="clock-wrapper">
+                <div class="clock-face" id="clockFace">
+                    <!-- Clock hands -->
+                    <div class="hand hour-hand" id="hourHand"></div>
+                    <div class="hand minute-hand" id="minuteHand"></div>
+                    <div class="hand second-hand" id="secondHand"></div>
+                    <div class="center-dot"></div>
+                    
+                    <!-- Numbers and markers will be added by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <h2>Clock Information</h2>
+                <div class="time-display" id="timeDisplay">7:22:00 AM</div>
+                
+                <div class="details">
+                    <div class="detail-item">
+                        <span class="detail-label">Hour hand position:</span>
+                        <span class="detail-value" id="hourPosition">221° from top</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Minute hand position:</span>
+                        <span class="detail-value" id="minutePosition">132° from top</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Time notation:</span>
+                        <span class="detail-value">07:22:00</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Clock status:</span>
+                        <span class="detail-value" id="clockStatus">Frozen at 7:22 AM</span>
+                    </div>
+                </div>
+                
+                <div class="explanation">
+                    <p>At 7:22 AM, the hour hand points slightly past the 7 (221° from the 12 o'clock position), 
+                    while the minute hand points to the 22-minute mark (132° from the 12 o'clock position).</p>
+                </div>
+                
+                <div class="controls">
+                    <button id="toggleAnimation">Start Real-Time Clock</button>
+                    <button id="resetTo722">Reset to 7:22 AM</button>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Interactive Analog Clock | Created with HTML, CSS, and JavaScript</p>
+        </footer>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const hourHand = document.getElementById('hourHand');
+        const minuteHand = document.getElementById('minuteHand');
+        const secondHand = document.getElementById('secondHand');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const hourPosition = document.getElementById('hourPosition');
+        const minutePosition = document.getElementById('minutePosition');
+        const clockStatus = document.getElementById('clockStatus');
+        const toggleAnimationBtn = document.getElementById('toggleAnimation');
+        const resetTo722Btn = document.getElementById('resetTo722');
+        const clockFace = document.getElementById('clockFace');
+        
+        // State variables
+        let isAnimating = false;
+        let animationInterval = null;
+        
+        // Function to create clock markers and numbers
+        function createClockMarkers() {
+            // Create hour markers (12 markers)
+            for (let i = 1; i <= 12; i++) {
+                // Create hour number
+                const number = document.createElement('div');
+                number.className = 'number';
+                number.textContent = i;
+                
+                // Position numbers around the clock
+                const angle = (i * 30) * Math.PI / 180; // Convert to radians
+                const radius = 120; // Distance from center
+                const x = Math.sin(angle) * radius;
+                const y = -Math.cos(angle) * radius;
+                
+                number.style.left = `calc(50% + ${x}px)`;
+                number.style.top = `calc(50% + ${y}px)`;
+                number.style.transform = 'translate(-50%, -50%)';
+                
+                clockFace.appendChild(number);
+                
+                // Create hour markers (thicker lines at each hour)
+                const hourMarker = document.createElement('div');
+                hourMarker.className = 'marker hour-marker';
+                
+                // Position marker
+                hourMarker.style.transform = `translateX(-50%) rotate(${i * 30}deg)`;
+                hourMarker.style.transformOrigin = 'bottom';
+                
+                clockFace.appendChild(hourMarker);
+            }
+            
+            // Create minute markers (60 markers, but we'll skip the hour positions)
+            for (let i = 0; i < 60; i++) {
+                // Skip positions where there are hour markers (every 5 minutes)
+                if (i % 5 !== 0) {
+                    const minuteMarker = document.createElement('div');
+                    minuteMarker.className = 'marker minute-marker';
+                    
+                    // Position marker
+                    minuteMarker.style.transform = `translateX(-50%) rotate(${i * 6}deg)`;
+                    minuteMarker.style.transformOrigin = 'bottom';
+                    
+                    clockFace.appendChild(minuteMarker);
+                }
+            }
+        }
+        
+        // Function to set clock to 7:22 AM
+        function setClockTo722() {
+            // 7:22 AM
+            const hour = 7;
+            const minute = 22;
+            const second = 0;
+            
+            // Calculate angles for each hand
+            // Minute hand moves 6° per minute
+            const minuteAngle = minute * 6; // 22 * 6 = 132°
+            
+            // Hour hand moves 0.5° per minute + 30° per hour
+            const hourAngle = (hour % 12) * 30 + minute * 0.5; // 7*30 + 22*0.5 = 210 + 11 = 221°
+            
+            // Second hand moves 6° per second
+            const secondAngle = second * 6;
+            
+            // Apply the rotations
+            hourHand.style.transform = `translateX(-50%) rotate(${hourAngle}deg)`;
+            minuteHand.style.transform = `translateX(-50%) rotate(${minuteAngle}deg)`;
+            secondHand.style.transform = `translateX(-50%) rotate(${secondAngle}deg)`;
+            
+            // Update time display
+            const amPm = hour < 12 ? 'AM' : 'PM';
+            const displayHour = hour % 12 || 12;
+            const displayMinute = minute.toString().padStart(2, '0');
+            const displaySecond = second.toString().padStart(2, '0');
+            
+            timeDisplay.textContent = `${displayHour}:${displayMinute}:${displaySecond} ${amPm}`;
+            hourPosition.textContent = `${Math.round(hourAngle)}° from top`;
+            minutePosition.textContent = `${Math.round(minuteAngle)}° from top`;
+        }
+        
+        // Function to update clock to current time
+        function updateClockToCurrentTime() {
+            const now = new Date();
+            const hour = now.getHours();
+            const minute = now.getMinutes();
+            const second = now.getSeconds();
+            
+            // Calculate angles for each hand
+            const minuteAngle = minute * 6 + second * 0.1; // Add slight movement for seconds
+            const hourAngle = (hour % 12) * 30 + minute * 0.5 + second * (0.5/60);
+            const secondAngle = second * 6;
+            
+            // Apply the rotations
+            hourHand.style.transform = `translateX(-50%) rotate(${hourAngle}deg)`;
+            minuteHand.style.transform = `translateX(-50%) rotate(${minuteAngle}deg)`;
+            secondHand.style.transform = `translateX(-50%) rotate(${secondAngle}deg)`;
+            
+            // Update time display
+            const amPm = hour < 12 ? 'AM' : 'PM';
+            const displayHour = hour % 12 || 12;
+            const displayMinute = minute.toString().padStart(2, '0');
+            const displaySecond = second.toString().padStart(2, '0');
+            
+            timeDisplay.textContent = `${displayHour}:${displayMinute}:${displaySecond} ${amPm}`;
+            hourPosition.textContent = `${Math.round(hourAngle)}° from top`;
+            minutePosition.textContent = `${Math.round(minuteAngle)}° from top`;
+        }
+        
+        // Function to toggle between 7:22 frozen and real-time
+        function toggleAnimation() {
+            if (isAnimating) {
+                // Stop animation, return to 7:22
+                clearInterval(animationInterval);
+                toggleAnimationBtn.textContent = 'Start Real-Time Clock';
+                clockStatus.textContent = 'Frozen at 7:22 AM';
+                setClockTo722();
+            } else {
+                // Start real-time animation
+                toggleAnimationBtn.textContent = 'Freeze at 7:22 AM';
+                clockStatus.textContent = 'Running in real-time';
+                updateClockToCurrentTime();
+                animationInterval = setInterval(updateClockToCurrentTime, 1000);
+            }
+            
+            isAnimating = !isAnimating;
+        }
+        
+        // Initialize the clock
+        function initClock() {
+            createClockMarkers();
+            setClockTo722();
+            
+            // Add event listeners
+            toggleAnimationBtn.addEventListener('click', toggleAnimation);
+            resetTo722Btn.addEventListener('click', () => {
+                if (isAnimating) {
+                    toggleAnimation(); // Stop animation first
+                }
+                setClockTo722();
+            });
+            
+            // Add a slight "tick" effect to the second hand when in real-time mode
+            setInterval(() => {
+                if (isAnimating) {
+                    secondHand.style.transition = 'transform 0.2s cubic-bezier(0.4, 2.3, 0.8, 1)';
+                    setTimeout(() => {
+                        secondHand.style.transition = 'transform 0.8s cubic-bezier(0.1, 2.7, 0.6, 1)';
+                    }, 200);
+                }
+            }, 1000);
+        }
+        
+        // Start the clock when page loads
+        window.addEventListener('DOMContentLoaded', initClock);
+    </script>
+</body>
+</html>
